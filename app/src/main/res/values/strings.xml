@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Maple</string>
+    <string name="main_title">Maple Accounting</string>
+    <string name="pre_edit">edit</string>
+    <string name="pre_delete">delete</string>
+    <string name="pre_back">back</string>
+    <string name="type">type</string>
+    <string name="amount">amount</string>
+    <string name="date">date</string>
+    <string name="note">note</string>
+    <string name="cost">cost</string>
+    <string name="income">income</string>
+    <string name="pull_account">下拉记账</string>
+    <string name="release_account">松开记账</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="cancle">取消</string>
+    <string name="confirm">确定</string>
+</resources>

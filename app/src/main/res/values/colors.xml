@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="colorgrey">#E9FDFD</color>
+
+
+
+
+    <color name="dong_color_white">#FFFFFF</color>
+    <color name="dong_color_font_gray">#EEEEEE</color>
+    <color name="dong_color_line_gray">#EEEEEE</color>
+    <color name="dong_color_btn_press_gray">#EEEEEE</color>
+
+    <color name="dong_cokor_btn_text">#333333</color>
+
+    <color name="dong_color_next_bg_enable">#fe5850</color>
+    <color name="dong_color_next_bg_disable">#fe8a84</color>
+
+
+    <color name="dong_color_next_text_enable">#ffffff</color>
+    <color name="dong_color_next_text_disable">#ffffff</color>
+</resources>

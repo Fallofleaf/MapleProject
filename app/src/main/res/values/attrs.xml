@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <declare-styleable name="NumKeyBoardView">
+        <attr name="next_enable" format="boolean" />
+        //要设置的不同状态属性，类型为boolean
+        <attr name="next_background" format="color" />
+        //要设置的自定义背景颜色属性，类型为color
+
+        <attr name="view_background" format="color" />
+        <attr name="line_color" format="color" />
+        <attr name="background_btn_press" format="color" />
+        <attr name="text_color_btn" format="color" />
+        <attr name="text_color_next" format="color" />
+        <attr name="text_next" format="string" />
+        <attr name="icon_back" format="reference" />
+        <attr name="text_size" format="dimension" />
+    </declare-styleable>
+
+
+</resources>
+
