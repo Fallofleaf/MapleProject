@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private AccountRecyclerViewAdapter accountRecyclerViewAdapter;
     private String typeTest = "支出";
 
+    TextView textViewIncomeTotal,textViewCostTotal;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
         textViewYear.setText(year + "年");
         textViewMonthDay.setText(month+"月"+day+"日");
 
+        textViewCostTotal = findViewById(R.id.costTotal);
+        textViewIncomeTotal = findViewById(R.id.incomeTotal);
+
 
         //关联recyclerView和适配器
         recyclerView = findViewById(R.id.recyclerView);
@@ -83,7 +88,17 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onChanged(final List<Account> accounts) {
                         accountRecyclerViewAdapter.getAllAccount(accounts);
-
+                        float cost =0;
+                        float income = 0;
+                        for (int i =0;i<accounts.size();i++){
+                            if (accounts.get(i).isType()){
+                                income += Float.parseFloat(accounts.get(i).getAmount());
+                            }else {
+                                cost += Float.parseFloat(accounts.get(i).getAmount());
+                            }
+                        }
+                        textViewCostTotal.setText("总消费\n "+ cost);
+                        textViewIncomeTotal.setText("总收入\n "+ income);
                         //当ItemDecoration已经添加了一个的时候，为了防止重复绘制，移除掉旧数据的，同时继续给新的数据设置Decoration，新的就变为了
                         //0，如果数据再次改变刷新，那么就移除0.再添加
                         if (recyclerView.getItemDecorationCount() != 0) {
