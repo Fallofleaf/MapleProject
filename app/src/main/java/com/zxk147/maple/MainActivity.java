@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,15 +35,10 @@ public class MainActivity extends AppCompatActivity {
     RefreshLayout smartRefreshLayout;
     private AccountViewModel accountViewModel;
     private AccountRecyclerViewAdapter accountRecyclerViewAdapter;
-    private int id;
-    private boolean type;
-    private int kind;
-    private String note;
-    private String date;
-    private String amount;
+    private String typeTest = "支出";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -162,37 +158,27 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.addOnItemTouchListener(new OnRecyclerViewClickListener(recyclerView) {
             @Override
             public void onItemClick(RecyclerView.ViewHolder viewHolder) {
-                final int position = viewHolder.getAdapterPosition();
-                final int id = (int) viewHolder.itemView.getTag();
-
+                final int id = (int) viewHolder.itemView.getTag(R.id.tag_id);
                 Intent intent = new Intent(MainActivity.this, EditPreActivity.class);
                 intent.putExtra("ID", id);
-
-                accountViewModel.getAllAccount().observe(MainActivity.this, new Observer<List<Account>>() {
-                    @Override
-                    public void onChanged(List<Account> accounts) {
-                        date = accounts.get(position).getDate();
-                        amount = accounts.get(position).getAmount();
-                        kind = accounts.get(position).getKind();
-                        note = accounts.get(position).getNote();
-                        type = accounts.get(position).isType();
-                    }
-                });
-                intent.putExtra("DATE", date);
-                intent.putExtra("TYPE", type);
-                intent.putExtra("KIND", kind);
-                intent.putExtra("NOTE", note);
-                intent.putExtra("AMOUNT", amount);
-
                 startActivity(intent);
             }
 
             @Override
             public void onItemLongClick(RecyclerView.ViewHolder viewHolder) {
-                int id = (int) viewHolder.itemView.getTag();
-                Account account = new Account(null, false, 1, null, null);
+                final int id = (int) viewHolder.itemView.getTag(R.id.tag_id);
+                final String date = (String) viewHolder.itemView.getTag(R.id.tag_date);
+                final String amount = (String) viewHolder.itemView.getTag(R.id.tag_amounnt);
+                final boolean type = (boolean) viewHolder.itemView.getTag(R.id.tag_type);
+                final String note = (String) viewHolder.itemView.getTag(R.id.tag_note);
+                final int kind = (int) viewHolder.itemView.getTag(R.id.tag_kind);
+                Account account = new Account(date, type, kind, note, amount);
                 account.setId(id);
                 accountViewModel.deleteAccount(account);
+                if (type == true){
+                    MainActivity.this.typeTest = "收入";
+                }
+                Toast.makeText(MainActivity.this,"删除了"+typeTest+date+kind+note+amount,Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="tag_id" type="id"></item>
+    <item name="tag_type" type="id"></item>
+    <item name="tag_amounnt" type="id"></item>
+    <item name="tag_date" type="id"></item>
+    <item name="tag_kind" type="id"></item>
+    <item name="tag_note" type="id"></item>
+</resources>

@@ -25,14 +25,7 @@ public class EditPreActivity extends AppCompatActivity {
     TextView textPreKind,textPreType,textPreNote,textPreAmount,textPreDate;
     Button buttonBack,buttonEdit,buttonDelete;
     AccountViewModel accountViewModel;
-
-
     private int id;
-    private boolean type;
-    private int kind;
-    private String note;
-    private String date;
-    private String amount;
 
 
 
@@ -41,20 +34,8 @@ public class EditPreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_pre);
 
-
-
-
-
-
         Intent intent =getIntent();
-        id = intent.getIntExtra("ID",0);
-        type = intent.getBooleanExtra("TYPE",false);
-        kind = intent.getIntExtra("KIND",0);
-        date = intent.getStringExtra("DATE");
-        note = intent.getStringExtra("NOTE");
-        amount = intent.getStringExtra("AMOUNT");
-
-
+        id = intent.getIntExtra("ID",-1);
 
         accountViewModel = new ViewModelProvider(this
                 ,new ViewModelProvider
@@ -78,6 +59,22 @@ public class EditPreActivity extends AppCompatActivity {
             }
         });
 
+        accountViewModel.getQueryById(id).observe(this, new Observer<Account>() {
+            @Override
+            public void onChanged(Account account) {
+                if (account!=null){
+                    textPreKind.setText(String.valueOf(account.getKind()));
+                    textPreAmount.setText(account.getAmount());
+                    textPreDate.setText(account.getDate());
+                    textPreNote.setText(account.getNote());
+                    if (account.isType()){
+                        textPreType.setText("收入");
+                    }else {
+                        textPreType.setText("支出");
+                    }
+                }
+            }
+        });
         buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,31 +90,6 @@ public class EditPreActivity extends AppCompatActivity {
                 Intent intent = new Intent(EditPreActivity.this,EditActivity.class);
                 intent.putExtra("ID",id);
                 startActivity(intent);
-            }
-        });
-
-        textPreKind.setText(String.valueOf(kind));
-        textPreAmount.setText(amount);
-        textPreDate.setText(date);
-        textPreNote.setText(note);
-        if (type){
-            textPreType.setText("收入");
-        }else {
-            textPreType.setText("支出");
-        }
-
-        accountViewModel.getAllAccount().observe(this, new Observer<List<Account>>() {
-            @Override
-            public void onChanged(List<Account> accounts) {
-                /*textPreKind.setText(String.valueOf(accounts.get(position).getKind()));
-                textPreAmount.setText(accounts.get(position).getAmount());
-                textPreDate.setText(accounts.get(position).getDate());
-                textPreNote.setText(accounts.get(position).getNote());
-                if (accounts.get(position).isType()){
-                    textPreType.setText("收入");
-                }else {
-                    textPreType.setText("支出");
-                }*/
             }
         });
     }

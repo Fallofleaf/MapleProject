@@ -1,6 +1,5 @@
 package com.zxk147.maple.adapter;
 
-import android.nfc.Tag;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.zxk147.maple.R;
 import com.zxk147.maple.data.Account;
-import com.zxk147.maple.data.AccountViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +32,17 @@ public class AccountRecyclerViewAdapter extends RecyclerView.Adapter<AccountRecy
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         final Account account = allAccount.get(position);
-        holder.itemView.setTag(account.getId());
+        //设置Tag
+        holder.itemView.setTag(R.id.tag_id,account.getId());
+        holder.itemView.setTag(R.id.tag_date,account.getDate());
+        holder.itemView.setTag(R.id.tag_kind,account.getKind());
+        holder.itemView.setTag(R.id.tag_amounnt,account.getAmount());
+        holder.itemView.setTag(R.id.tag_note,account.getNote());
+        holder.itemView.setTag(R.id.tag_type,account.isType());
+
         holder.itemContentKind.setText(String.valueOf(account.getKind()));
         holder.itemContentNote.setText(account.getNote());
+
         if (account.isType()) {
             holder.itemContentAmount.setText(account.getAmount());
         }else {
