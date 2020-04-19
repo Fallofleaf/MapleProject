@@ -2,9 +2,12 @@ package com.zxk147.maple;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -27,18 +30,25 @@ import com.zxk147.maple.data.AccountViewModel;
 import com.zxk147.maple.editFragment.CostFragment;
 import com.zxk147.maple.editFragment.IncomeFragment;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class EditActivity extends AppCompatActivity {
 
-    EditText editTextType,editTextAmount,editTextKind,editTextDate,editTextNote;
+    private static String TAG= "EditActivity";
+
+    EditText editTextType,editTextAmount,editTextKind,editTextNote;
     Button buttonConfirm;
-    NumKeyBoardView numKeyBoardView;
-    TextView textViewDate,textViewCancle,textViewConfirm;
-    DatePicker datePicker;
+    CalendarView calendarView;
     AccountViewModel accountViewModel;
     int id;
     TabLayout tableLayout;
     ViewPager2 viewPager2;
     TabItem tabItem1,tabItem2;
+
+    Bundle bundle;
+
+    private long mCalendar = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,22 +59,118 @@ public class EditActivity extends AppCompatActivity {
         editTextNote = findViewById(R.id.editTextNote);
         editTextAmount = findViewById(R.id.editTextAmuont);
         editTextKind = findViewById(R.id.editTextKind);
-        editTextDate = findViewById(R.id.editTextDate);
-
         buttonConfirm = findViewById(R.id.edit_confirm);
-
         tableLayout = findViewById(R.id.tabLayout);
         tabItem1 = findViewById(R.id.asd);
         tabItem2 = findViewById(R.id.ds);
         viewPager2 = findViewById(R.id.viewpager_edit);
 
+        calendarView = findViewById(R.id.edit_calendarView);
 
+        accountViewModel = new ViewModelProvider(this
+                ,new ViewModelProvider
+                .AndroidViewModelFactory(getApplication()))
+                .get(AccountViewModel.class);
+
+        final Intent intent = getIntent();
+        id = intent.getIntExtra("ID",-1);
+        if (id!=-1){
+            accountViewModel.getQueryById(id).observe(this, new Observer<Account>() {
+                @Override
+                public void onChanged(final Account account) {
+                    calendarView.setDate(account.getDate());
+                    String date = (String) DateFormat.format("yyyy年MM月dd日",account.getDate());
+                    editTextNote.setText(account.getNote());
+                    editTextKind.setText(String.valueOf(account.getKind()));
+                    editTextAmount.setText(account.getAmount());
+                    calendarView.setDate(account.getDate());
+
+
+                    bundle = new Bundle();
+                    bundle.putInt("KIND",account.getKind());
+                    Log.e(TAG,"此时的bundle是："+bundle);
+
+//                    if (account.isType()){
+//                        editTextType.setText("收入");
+//                    }else {
+//                        editTextType.setText("支出");
+//                    }
+
+                    //利用延时操作，通过自身特点滑动到特定位置
+                    if (account.isType()){
+                        tableLayout.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                tableLayout.getTabAt(1).select();
+                            }
+                        },10);
+                    }
+
+                }
+            });
+            Calendar calendar = Calendar.getInstance();
+            mCalendar = calendar.getTime().getTime();
+            calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+                @Override
+                public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(year,month,dayOfMonth);
+                    mCalendar = calendar.getTime().getTime();
+                }
+            });
+            buttonConfirm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int currentItem = viewPager2.getCurrentItem();
+                    boolean type = true;
+                    Log.e("sdsdddddddddddddd",currentItem+"ds");
+                    if (currentItem==0){
+                        type = false;
+                    }
+
+                    int kind = Integer.parseInt(editTextKind.getText().toString());
+                    Account account = new Account(mCalendar,type,kind,editTextNote.getText().toString(),editTextAmount.getText().toString());
+                    account.setId(id);
+                    accountViewModel.updateAccount(account);
+                    finish();
+                }
+            });
+        }else {
+            Calendar calendar = Calendar.getInstance();
+            mCalendar = calendar.getTime().getTime();
+            calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+                @Override
+                public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(year,month,dayOfMonth);
+                    mCalendar = calendar.getTime().getTime();
+                }
+            });
+            buttonConfirm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int currentItem = viewPager2.getCurrentItem();
+                    boolean type = true;
+                    Log.e("sdsdddddddddddddd",currentItem+"ds");
+                    if (currentItem==0){
+                        type = false;
+                    }
+                    int kind = Integer.parseInt(editTextKind.getText().toString());
+                    Account account = new Account(mCalendar,type,kind,editTextNote.getText().toString(),editTextAmount.getText().toString());
+                    accountViewModel.insertAccount(account);
+                    finish();
+                }
+            });
+        }
         viewPager2.setAdapter(new FragmentStateAdapter(this) {
             @NonNull
             @Override
             public Fragment createFragment(int position) {
                 if (position == 0) {
-                    return new CostFragment();
+                    Fragment fragment = new CostFragment();
+                    Log.e(TAG,"传入fragment前的bundle是："+bundle);
+                    fragment.setArguments(bundle);
+                    return fragment;
                 }else {
                     return new IncomeFragment();
                 }
@@ -86,75 +192,6 @@ public class EditActivity extends AppCompatActivity {
                 }
             }
         }).attach();
-
-
-
-        accountViewModel = new ViewModelProvider(this
-                ,new ViewModelProvider
-                .AndroidViewModelFactory(getApplication()))
-                .get(AccountViewModel.class);
-
-        final Intent intent = getIntent();
-        id = intent.getIntExtra("ID",-1);
-        if (id!=-1){
-            accountViewModel.getQueryById(id).observe(this, new Observer<Account>() {
-                @Override
-                public void onChanged(Account account) {
-                    editTextDate.setText(account.getDate());
-                    editTextNote.setText(account.getNote());
-                    editTextKind.setText(String.valueOf(account.getKind()));
-                    editTextAmount.setText(account.getAmount());
-//                    if (account.isType()){
-//                        editTextType.setText("收入");
-//                    }else {
-//                        editTextType.setText("支出");
-//                    }
-
-                    //利用延时操作，通过自身特点滑动到特定位置
-                    if (account.isType()){
-                        tableLayout.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                tableLayout.getTabAt(1).select();
-                            }
-                        },10);
-                    }
-
-                }
-            });
-            buttonConfirm.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int currentItem = viewPager2.getCurrentItem();
-                    boolean type = true;
-                    Log.e("sdsdddddddddddddd",currentItem+"ds");
-                    if (currentItem==0){
-                        type = false;
-                    }
-                    int kind = Integer.parseInt(editTextKind.getText().toString());
-                    Account account = new Account(editTextDate.getText().toString(),type,kind,editTextNote.getText().toString(),editTextAmount.getText().toString());
-                    account.setId(id);
-                    accountViewModel.updateAccount(account);
-                    finish();
-                }
-            });
-        }else {
-            buttonConfirm.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int currentItem = viewPager2.getCurrentItem();
-                    boolean type = true;
-                    Log.e("sdsdddddddddddddd",currentItem+"ds");
-                    if (currentItem==0){
-                        type = false;
-                    }
-                    int kind = Integer.parseInt(editTextKind.getText().toString());
-                    Account account = new Account(editTextDate.getText().toString(),type,kind,editTextNote.getText().toString(),editTextAmount.getText().toString());
-                    accountViewModel.insertAccount(account);
-                    finish();
-                }
-            });
-        }
 
 
 

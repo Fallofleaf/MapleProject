@@ -9,6 +9,7 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import com.zxk147.maple.data.Account;
 import com.zxk147.maple.data.AccountDao;
 import com.zxk147.maple.data.AccountViewModel;
 
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +67,8 @@ public class EditPreActivity extends AppCompatActivity {
                 if (account!=null){
                     textPreKind.setText(String.valueOf(account.getKind()));
                     textPreAmount.setText(account.getAmount());
-                    textPreDate.setText(account.getDate());
+                    String date = (String) DateFormat.format("yyyy年MM月dd日",account.getDate());
+                    textPreDate.setText(date);
                     textPreNote.setText(account.getNote());
                     if (account.isType()){
                         textPreType.setText("收入");
@@ -78,7 +81,7 @@ public class EditPreActivity extends AppCompatActivity {
         buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Account account = new Account(null,false,1,null,null);
+                Account account = new Account(0,false,1,null,null);
                 account.setId(id);
                 accountViewModel.deleteAccount(account);
                 finish();

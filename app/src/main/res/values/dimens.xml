@@ -2,4 +2,7 @@
 <resources>
     <dimen name="main_title_dimen">16sp</dimen>
     <dimen name="threeTwo">32dp</dimen>
+    <dimen name="side_main">8dp</dimen>
+    <dimen name="side_content" >16dp</dimen>
+    <dimen name="text_content_size">16sp</dimen>
 </resources>

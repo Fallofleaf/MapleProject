@@ -10,7 +10,7 @@
         android:id="@+id/view"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:background="@color/colorAccent"
+        android:background="@color/red_chensha"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,43 +39,48 @@
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginLeft="@dimen/side_main"
+        android:layout_marginRight="@dimen/side_main"
+        android:background="@color/colorgrey"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline"
         app:srlAccentColor="@android:color/white"
         app:srlEnablePreviewInEditMode="true">
+
         <com.scwang.smartrefresh.header.DeliveryHeader
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            >
+            android:paddingLeft="@dimen/side_main"
+            android:paddingRight="@dimen/side_main">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="left"
                 android:text="松开记账"
-                android:textSize="32sp"
-                android:gravity="left"/>
+                android:textSize="32sp" />
         </com.scwang.smartrefresh.header.DeliveryHeader>
 
-<!--        <com.zxk147.maple.SmartswipeRefresh.Header-->
-<!--            android:id="@+id/smartRefreshHeader"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            app:srlAccentColor="@android:color/white"-->
-<!--            app:srlClassicsSpinnerStyle="Translate"-->
-<!--            app:srlDrawableArrow="@drawable/ic_add_black_24dp"-->
-<!--            app:srlDrawableMarginRight="20dp"-->
-<!--            app:srlDrawableProgress="@drawable/ic_add_black_24dp"-->
-<!--            app:srlDrawableProgressSize="20dp"-->
-<!--            app:srlDrawableSize="32dp"-->
-<!--            app:srlPrimaryColor="@color/colorPrimary"-->
-<!--            />-->
+        <!--        <com.zxk147.maple.SmartswipeRefresh.Header-->
+        <!--            android:id="@+id/smartRefreshHeader"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            app:srlAccentColor="@android:color/white"-->
+        <!--            app:srlClassicsSpinnerStyle="Translate"-->
+        <!--            app:srlDrawableArrow="@drawable/ic_add_black_24dp"-->
+        <!--            app:srlDrawableMarginRight="20dp"-->
+        <!--            app:srlDrawableProgress="@drawable/ic_add_black_24dp"-->
+        <!--            app:srlDrawableProgressSize="20dp"-->
+        <!--            app:srlDrawableSize="32dp"-->
+        <!--            app:srlPrimaryColor="@color/colorPrimary"-->
+        <!--            />-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorgrey"/>
+            android:layout_height="match_parent" />
     </com.scwang.smartrefresh.layout.SmartRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

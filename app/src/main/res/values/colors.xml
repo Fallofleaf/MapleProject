@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="colorgrey">#E9FDFD</color>
+    <color name="colorgrey_more">#C3FAFA</color>
 
 
 
@@ -21,4 +22,6 @@
 
     <color name="dong_color_next_text_enable">#ffffff</color>
     <color name="dong_color_next_text_disable">#ffffff</color>
+
+    <color name="red_chensha">#e74c3c</color>
 </resources>

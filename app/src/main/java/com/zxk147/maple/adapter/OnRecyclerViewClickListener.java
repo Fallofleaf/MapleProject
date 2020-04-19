@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.zxk147.maple.R;
+
 public abstract class OnRecyclerViewClickListener implements RecyclerView.OnItemTouchListener {
 
     private GestureDetectorCompat gestureDetectorCompat;

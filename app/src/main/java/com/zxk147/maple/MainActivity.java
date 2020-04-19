@@ -2,6 +2,7 @@ package com.zxk147.maple;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,9 +23,16 @@ import com.zxk147.maple.adapter.AccountRecyclerViewAdapter;
 import com.zxk147.maple.adapter.OnRecyclerViewClickListener;
 import com.zxk147.maple.data.Account;
 import com.zxk147.maple.data.AccountViewModel;
+import com.zxk147.maple.data.TypeAccount;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
+import javax.sql.StatementEvent;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -87,45 +95,141 @@ public class MainActivity extends AppCompatActivity {
                 , new Observer<List<Account>>() {
                     @Override
                     public void onChanged(final List<Account> accounts) {
-                        accountRecyclerViewAdapter.getAllAccount(accounts);
-                        float cost =0;
-                        float income = 0;
+
+
+
+                        List<Account>allAccount = accounts;
+                        List<TypeAccount> typeAccounts = new ArrayList<>();
+                        for (int i = 0;i<allAccount.size();i++){
+                            if (i == 0&&accounts.size()!=0){
+                                TypeAccount typeAccount = new TypeAccount(-1,
+                                        allAccount.get(i).getDate(),
+                                        allAccount.get(i).isType(),
+                                        allAccount.get(i).getKind(),
+                                        allAccount.get(i).getNote(),
+                                        allAccount.get(i).getAmount(),
+                                        true,
+                                        null,
+                                        null);
+                                typeAccounts.add(typeAccount);
+                                TypeAccount typeAccount1 = new TypeAccount(allAccount.get(i).getId(),
+                                        allAccount.get(i).getDate(),
+                                        allAccount.get(i).isType(),
+                                        allAccount.get(i).getKind(),
+                                        allAccount.get(i).getNote(),
+                                        allAccount.get(i).getAmount(),
+                                        false,
+                                        null,
+                                        null);
+                                typeAccounts.add(typeAccount1);
+                            }else if (!isSameDay(allAccount.get(i).getDate(),allAccount.get(i-1).getDate())){
+                                TypeAccount typeAccount = new TypeAccount(-1,
+                                        allAccount.get(i).getDate(),
+                                        allAccount.get(i).isType(),
+                                        allAccount.get(i).getKind(),
+                                        allAccount.get(i).getNote(),
+                                        allAccount.get(i).getAmount(),
+                                        true,
+                                        null,
+                                        null);
+                                typeAccounts.add(typeAccount);
+                                TypeAccount typeAccount1 = new TypeAccount(allAccount.get(i).getId(),
+                                        allAccount.get(i).getDate(),
+                                        allAccount.get(i).isType(),
+                                        allAccount.get(i).getKind(),
+                                        allAccount.get(i).getNote(),
+                                        allAccount.get(i).getAmount(),
+                                        false,
+                                        null,
+                                        null);
+                                typeAccounts.add(typeAccount1);
+                            }else {
+                                TypeAccount typeAccount = new TypeAccount(allAccount.get(i).getId(),
+                                        allAccount.get(i).getDate(),
+                                        allAccount.get(i).isType(),
+                                        allAccount.get(i).getKind(),
+                                        allAccount.get(i).getNote(),
+                                        allAccount.get(i).getAmount(),
+                                        false,
+                                        null,
+                                        null);
+                                typeAccounts.add(typeAccount);
+                            }
+                        }
+                        Log.e("alllisr",allAccount.size()+"ddd");
+                        Log.e("mmmmmmm",typeAccounts.size()+"ddd");
+                        float cost=0;
+                        float income=0;
+                        int m = 0;
+
+                        if (typeAccounts.size()>0){
+                        for (int i =0;i<typeAccounts.size()+1;i++){
+                            if (i==typeAccounts.size()){
+                                typeAccounts.get(i-m).setCost(String.valueOf(cost));
+                                typeAccounts.get(i-m).setIncome(String.valueOf(income));
+                            }else if (typeAccounts.get(i).isTitle()){
+                                typeAccounts.get(i-m).setCost(String.valueOf(cost));
+                                typeAccounts.get(i-m).setIncome(String.valueOf(income));
+                                cost=0;
+                                m = 1;
+                            }else  {
+                                if (typeAccounts.get(i).isType()){
+                                    income += Float.parseFloat(typeAccounts.get(i).getAmount());
+                                }else {
+                                    cost += Float.parseFloat(typeAccounts.get(i).getAmount());
+                                }
+                                m +=1;
+                            }
+                        }
+                        for (int i =0;i<typeAccounts.size();i++){
+                            Log.e("type",typeAccounts.get(0).getAmount());
+                        }
+                        for (int i =0;i<allAccount.size();i++){
+                            Log.e("mmmmmmmmmmmmmmmmmm",allAccount.get(0).getNote());
+                        }
+                        Log.e("sizeall",allAccount.size()+"ddd");
+                        Log.e("sizeafter",typeAccounts.size()+"ddd");
+                        }
+
+                        accountRecyclerViewAdapter.getAllAccount(typeAccounts);
+                        float costall =0;
+                        float incomeall = 0;
                         for (int i =0;i<accounts.size();i++){
                             if (accounts.get(i).isType()){
-                                income += Float.parseFloat(accounts.get(i).getAmount());
+                                incomeall += Float.parseFloat(accounts.get(i).getAmount());
                             }else {
-                                cost += Float.parseFloat(accounts.get(i).getAmount());
+                                costall += Float.parseFloat(accounts.get(i).getAmount());
                             }
                         }
-                        textViewCostTotal.setText("总消费\n "+ cost);
-                        textViewIncomeTotal.setText("总收入\n "+ income);
-                        //当ItemDecoration已经添加了一个的时候，为了防止重复绘制，移除掉旧数据的，同时继续给新的数据设置Decoration，新的就变为了
-                        //0，如果数据再次改变刷新，那么就移除0.再添加
-                        if (recyclerView.getItemDecorationCount() != 0) {
-                            recyclerView.removeItemDecorationAt(0);
-                        }
-                        recyclerView.addItemDecoration(new AccountItemDecoration(MainActivity.this, new AccountItemDecoration.DecorationCallBack() {
-
-                            @Override
-                            public String getGroupDate(int position) {
-                                return accounts.get(position).getDate();
-                            }
-
-                            @Override
-                            public String getGroupFirstDate(int position) {
-                                return accounts.get(position).getDate();
-                            }
-
-                            @Override
-                            public boolean getGroupType(int position) {
-                                return accounts.get(position).isType();
-                            }
-
-                            @Override
-                            public String getGroupAmount(int position) {
-                                return accounts.get(position).getAmount();
-                            }
-                        }));
+                        textViewCostTotal.setText("总消费\n "+ costall);
+                        textViewIncomeTotal.setText("总收入\n "+ incomeall);
+//                        //当ItemDecoration已经添加了一个的时候，为了防止重复绘制，移除掉旧数据的，同时继续给新的数据设置Decoration，新的就变为了
+//                        //0，如果数据再次改变刷新，那么就移除0.再添加
+//                        if (recyclerView.getItemDecorationCount() != 0) {
+//                            recyclerView.removeItemDecorationAt(0);
+//                        }
+//                        recyclerView.addItemDecoration(new AccountItemDecoration(MainActivity.this, new AccountItemDecoration.DecorationCallBack() {
+//
+//                            @Override
+//                            public String getGroupDate(int position) {
+//                                return accounts.get(position).getDate();
+//                            }
+//
+//                            @Override
+//                            public String getGroupFirstDate(int position) {
+//                                return accounts.get(position).getDate();
+//                            }
+//
+//                            @Override
+//                            public boolean getGroupType(int position) {
+//                                return accounts.get(position).isType();
+//                            }
+//
+//                            @Override
+//                            public String getGroupAmount(int position) {
+//                                return accounts.get(position).getAmount();
+//                            }
+//                        }));
 
                         accountRecyclerViewAdapter.notifyDataSetChanged();
                     }
@@ -135,10 +239,20 @@ public class MainActivity extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = 1; i < 6; i++) {
-                    Account account = new Account("2020.4." + i, false, 2, "谁知道", "23");
-                    accountViewModel.insertAccount(account);
-                }
+                Intent intent = new Intent(MainActivity.this, EditActivity.class);
+                startActivity(intent);
+//                for (int i = 1; i < 6; i++) {
+//                    String string = "2020-4-"+i+" 12:12:12";
+//                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                    Date date = null;
+//                    try {
+//                        date = simpleDateFormat.parse(string);
+//                    } catch (ParseException e) {
+//                        e.printStackTrace();
+//                    }
+//                    Account account = new Account(date.getTime(), false, 2, "谁知道", "23");
+//                    accountViewModel.insertAccount(account);
+//                }
             }
         });
 
@@ -174,28 +288,43 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(RecyclerView.ViewHolder viewHolder) {
                 final int id = (int) viewHolder.itemView.getTag(R.id.tag_id);
-                Intent intent = new Intent(MainActivity.this, EditPreActivity.class);
-                intent.putExtra("ID", id);
-                startActivity(intent);
+                if (id!=-1){
+                    Intent intent = new Intent(MainActivity.this, EditPreActivity.class);
+                    intent.putExtra("ID", id);
+                    startActivity(intent);
+                }
             }
 
             @Override
             public void onItemLongClick(RecyclerView.ViewHolder viewHolder) {
                 final int id = (int) viewHolder.itemView.getTag(R.id.tag_id);
-                final String date = (String) viewHolder.itemView.getTag(R.id.tag_date);
-                final String amount = (String) viewHolder.itemView.getTag(R.id.tag_amounnt);
-                final boolean type = (boolean) viewHolder.itemView.getTag(R.id.tag_type);
-                final String note = (String) viewHolder.itemView.getTag(R.id.tag_note);
-                final int kind = (int) viewHolder.itemView.getTag(R.id.tag_kind);
-                Account account = new Account(date, type, kind, note, amount);
-                account.setId(id);
-                accountViewModel.deleteAccount(account);
-                if (type == true){
-                    MainActivity.this.typeTest = "收入";
+                if (id!=-1){
+                    final long date = (long) viewHolder.itemView.getTag(R.id.tag_date);
+                    final String amount = (String) viewHolder.itemView.getTag(R.id.tag_amounnt);
+                    final boolean type = (boolean) viewHolder.itemView.getTag(R.id.tag_type);
+                    final String note = (String) viewHolder.itemView.getTag(R.id.tag_note);
+                    final int kind = (int) viewHolder.itemView.getTag(R.id.tag_kind);
+                    Account account = new Account(date, type, kind, note, amount);
+                    account.setId(id);
+                    accountViewModel.deleteAccount(account);
+                    if (type == true){
+                        MainActivity.this.typeTest = "收入";
+                    }
+                    Toast.makeText(MainActivity.this,"删除了"+typeTest+date+kind+note+amount,Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(MainActivity.this,"删除了"+typeTest+date+kind+note+amount,Toast.LENGTH_SHORT).show();
+
             }
         });
 
+    }
+    public boolean isSameDay(long date1,long date2){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String da1 = simpleDateFormat.format(date1);
+        String da2 = simpleDateFormat.format(date2);
+        if (da1.equals(da2)){
+            return true;
+        }else {
+            return false;
+        }
     }
 }

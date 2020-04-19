@@ -11,7 +11,7 @@ public class Account {
     @PrimaryKey(autoGenerate = true)
     private int id;
     @ColumnInfo(name = "date")
-    private String date;
+    private long date;
     @ColumnInfo(name = "type")
     private boolean type;
     @ColumnInfo(name = "kind")
@@ -23,7 +23,7 @@ public class Account {
 
 
 
-    public Account(String date, boolean type, int kind, String note,String amount) {
+    public Account(long date, boolean type, int kind, String note,String amount) {
         this.date = date;
         this.type = type;
         this.kind = kind;
@@ -31,11 +31,11 @@ public class Account {
         this.note = note;
     }
 
-    public String getDate() {
+    public long getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(long date) {
         this.date = date;
     }
 
