@@ -21,10 +21,52 @@ public class AccountRecyclerViewAdapter extends RecyclerView.Adapter<AccountRecy
 
     List<Account> allAccount = new ArrayList<>();
     List<TypeAccount> typeAccounts = new ArrayList<>();
+    private List<String> costData = new ArrayList<>();
+    private List<String> incomeData = new ArrayList<>();
+
 
     public void getAllAccount(List<TypeAccount> allAccount) {
         this.typeAccounts = allAccount;
         Log.e("typeAccountmain",typeAccounts.size()+"sdddddds");
+        costData.add("餐饮");
+        costData.add("购物");
+        costData.add("日用");
+        costData.add("交通");
+        costData.add("蔬菜");
+        costData.add("水果");
+        costData.add("零食");
+        costData.add("运动");
+        costData.add("娱乐");
+        costData.add("通讯");
+        costData.add("服饰");
+        costData.add("美容");
+        costData.add("住房");
+        costData.add("居家");
+        costData.add("孩子");
+        costData.add("长辈");
+        costData.add("社交");
+        costData.add("旅行");
+        costData.add("烟酒");
+        costData.add("数码");
+        costData.add("汽车");
+        costData.add("医疗");
+        costData.add("书籍");
+        costData.add("学习");
+        costData.add("宠物");
+        costData.add("礼金");
+        costData.add("礼物");
+        costData.add("办公");
+        costData.add("维修");
+        costData.add("捐赠");
+        costData.add("彩票");
+        costData.add("亲友");
+        costData.add("快递");
+        costData.add("其他");
+        incomeData.add("工资");
+        incomeData.add("兼职");
+        incomeData.add("理财");
+        incomeData.add("礼金");
+        incomeData.add("其他");
     }
 
     @NonNull
@@ -52,8 +94,12 @@ public class AccountRecyclerViewAdapter extends RecyclerView.Adapter<AccountRecy
             holder.itemView.setTag(R.id.tag_amounnt,account.getAmount());
             holder.itemView.setTag(R.id.tag_note,account.getNote());
             holder.itemView.setTag(R.id.tag_type,account.isType());
+            if (!account.isType()){
+                holder.itemContentKind.setText(costData.get(account.getKind()));
+            }else {
+                holder.itemContentKind.setText(incomeData.get(account.getKind()));
+            }
 
-            holder.itemContentKind.setText(String.valueOf(account.getKind()));
             holder.itemContentNote.setText(account.getNote());
 
             if (account.isType()) {

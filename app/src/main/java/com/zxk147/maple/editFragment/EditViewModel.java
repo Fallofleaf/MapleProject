@@ -18,4 +18,6 @@ public class EditViewModel extends ViewModel {
     }
 
     public int id = -1;
+    public boolean type = false;
+    public int kind = -1;
 }

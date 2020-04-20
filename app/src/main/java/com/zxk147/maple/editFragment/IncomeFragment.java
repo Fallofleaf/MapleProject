@@ -24,7 +24,7 @@ import java.util.Objects;
 public class IncomeFragment extends Fragment {
 
     EditViewModel editViewModel;
-    private List<String> mData = new ArrayList<>();
+    private List<String> incomeData = new ArrayList<>();
     RecyclerView recyclerView;
     private CostRecyclerViewAdapter costRecyclerViewAdapter;
     private int kind;
@@ -48,19 +48,25 @@ public class IncomeFragment extends Fragment {
 
 
         editViewModel = new ViewModelProvider(Objects.requireNonNull(getActivity())).get(EditViewModel.class);
-        for (int i=0;i<6;i++){
-            mData.add("dsd"+i);
-        }
+        incomeData.add("工资");
+        incomeData.add("兼职");
+        incomeData.add("理财");
+        incomeData.add("礼金");
+        incomeData.add("其他");
         editViewModel.getMyPosition().observe(getActivity(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
                 kind = integer;
+                if (kind> incomeData.size()-1){
+                    kind = incomeData.size()-1;
+                    editViewModel.changeMyPosition(kind);
+                }
             }
         });
 
 
         recyclerView = getActivity().findViewById(R.id.fragment_income_recyclerview);
-        costRecyclerViewAdapter = new CostRecyclerViewAdapter(mData,getContext(),kind);
+        costRecyclerViewAdapter = new CostRecyclerViewAdapter(incomeData,getContext(),kind);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),4);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(costRecyclerViewAdapter);

@@ -31,7 +31,7 @@ public class EditActivity extends AppCompatActivity{
 
     private static String TAG= "EditActivity";
 
-    EditText editTextType,editTextAmount,editTextKind,editTextNote;
+    EditText editTextAmount,editTextNote;
     Button buttonConfirm;
     CalendarView calendarView;
     AccountViewModel accountViewModel;
@@ -39,15 +39,10 @@ public class EditActivity extends AppCompatActivity{
     TabLayout tableLayout;
     ViewPager2 viewPager2;
     TabItem tabItem1,tabItem2;
-
-    Bundle bundle;
+    //Bundle bundle;
     private long mCalendar = 0;
-
     int editKind=-1;
-
     EditViewModel editViewModel;
-
-
     Fragment incomeFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,16 +50,12 @@ public class EditActivity extends AppCompatActivity{
         setContentView(R.layout.activity_edit);
         //初始化fragment和bundle
         final CostFragment costFragment = new CostFragment();
-
         incomeFragment = new IncomeFragment();
-        bundle = new Bundle();
-
+        //bundle = new Bundle();
         editTextNote = findViewById(R.id.editTextNote);
         editTextAmount = findViewById(R.id.editTextAmuont);
-        editTextKind = findViewById(R.id.editTextKind);
         buttonConfirm = findViewById(R.id.edit_confirm);
-
-
+        calendarView = findViewById(R.id.edit_calendarView);
         editViewModel = new ViewModelProvider(this
                 ,new ViewModelProvider
                 .AndroidViewModelFactory(getApplication()))
@@ -75,10 +66,6 @@ public class EditActivity extends AppCompatActivity{
                 editKind=integer;
             }
         });
-
-
-        calendarView = findViewById(R.id.edit_calendarView);
-
         accountViewModel = new ViewModelProvider(this
                 ,new ViewModelProvider
                 .AndroidViewModelFactory(getApplication()))
@@ -87,31 +74,25 @@ public class EditActivity extends AppCompatActivity{
         tabItem1 = findViewById(R.id.asd);
         tabItem2 = findViewById(R.id.ds);
         viewPager2 = findViewById(R.id.viewpager_edit);
-
-
-
         final Intent intent = getIntent();
         id = intent.getIntExtra("ID",-1);
-        id = editViewModel.id;
         if (id!=-1){
             accountViewModel.getQueryById(id).observe(this, new Observer<Account>() {
                 @Override
                 public void onChanged(final Account account) {
+                    editViewModel.changeMyPosition(account.getKind());
                     calendarView.setDate(account.getDate());
                     mCalendar = account.getDate();
 //                    String date = (String) DateFormat.format("yyyy年MM月dd日",account.getDate());
                     editTextNote.setText(account.getNote());
-                    editTextKind.setText(String.valueOf(account.getKind()));
                     editTextAmount.setText(account.getAmount());
                     calendarView.setDate(account.getDate());
-
 //                    /**
 //                     * 在合适的位置调用接口里面的方法,传递数据
 //                     */
 //                    editKind = account.getKind();
                     editViewModel.changeMyPosition(account.getKind());
                     Log.e(TAG,"此时的kind是："+account.getKind());
-
                     viewPager2.setAdapter(new FragmentStateAdapter(EditActivity.this) {
                         @NonNull
                         @Override
@@ -138,22 +119,21 @@ public class EditActivity extends AppCompatActivity{
                             }
                         }
                     }).attach();
-//                    if (account.isType()){
-//                        editTextType.setText("收入");
-//                    }else {
-//                        editTextType.setText("支出");
-//                    }
-
                     //利用延时操作，通过自身特点滑动到特定位置
                     if (account.isType()){
                         tableLayout.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 tableLayout.getTabAt(1).select();
+                                editViewModel.type = true;
                             }
                         },10);
                     }
-
+//                    if (account.isType()){
+//                        editTextType.setText("收入");
+//                    }else {
+//                        editTextType.setText("支出");
+//                    }
                 }
             });
 //            Calendar calendar = Calendar.getInstance();
@@ -181,7 +161,6 @@ public class EditActivity extends AppCompatActivity{
 //                            editKind = position;
 //                        }
 //                    });
-                    int kind = Integer.parseInt(editTextKind.getText().toString());
                     Account account = new Account(mCalendar,type,editKind,editTextNote.getText().toString(),editTextAmount.getText().toString());
                     account.setId(id);
                     accountViewModel.updateAccount(account);
@@ -189,7 +168,6 @@ public class EditActivity extends AppCompatActivity{
                 }
             });
         }else {
-
             viewPager2.setAdapter(new FragmentStateAdapter(EditActivity.this) {
                 @NonNull
                 @Override
@@ -216,7 +194,6 @@ public class EditActivity extends AppCompatActivity{
                     }
                 }
             }).attach();
-
             Calendar calendar = Calendar.getInstance();
             mCalendar = calendar.getTime().getTime();
             calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
@@ -241,17 +218,15 @@ public class EditActivity extends AppCompatActivity{
                         public void onChanged(Integer integer) {
                             editKind = integer;
                         }
-                    });
-                    int kind = Integer.parseInt(editTextKind.getText().toString());
-                    Account account = new Account(mCalendar,type,editKind,editTextNote.getText().toString(),editTextAmount.getText().toString());
-                    accountViewModel.insertAccount(account);
-                    finish();
+                    });if (editKind!=-1&&editTextAmount.getText().toString().trim().length()>0){
+                        Account account = new Account(mCalendar,type,editKind,editTextNote.getText().toString(),editTextAmount.getText().toString());
+                        accountViewModel.insertAccount(account);
+                        finish();
+                    }
+
                 }
             });
         }
-
-
-
 //        /**
 //         * 在合适的位置调用接口里面的方法,传递数据
 //         */
@@ -265,11 +240,7 @@ public class EditActivity extends AppCompatActivity{
         /**
          * 添加Fragment
          */
-
-
     }
-
-
 //    /**
 //     * 定义一个接口
 //     */
