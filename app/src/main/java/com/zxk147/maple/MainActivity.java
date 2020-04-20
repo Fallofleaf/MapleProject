@@ -18,35 +18,31 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
-import com.zxk147.maple.adapter.AccountItemDecoration;
 import com.zxk147.maple.adapter.AccountRecyclerViewAdapter;
 import com.zxk147.maple.adapter.OnRecyclerViewClickListener;
 import com.zxk147.maple.data.Account;
 import com.zxk147.maple.data.AccountViewModel;
 import com.zxk147.maple.data.TypeAccount;
+import com.zxk147.maple.editFragment.EditViewModel;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-
-import javax.sql.StatementEvent;
 
 public class MainActivity extends AppCompatActivity {
 
     SwipeRefreshLayout swipeRefreshLayout;
     FloatingActionButton floatingActionButton;
-    TextView textViewYear,textViewMonthDay;
+    TextView textViewYear, textViewMonthDay;
     RecyclerView recyclerView;
     RefreshLayout smartRefreshLayout;
+    TextView textViewIncomeTotal, textViewCostTotal;
     private AccountViewModel accountViewModel;
     private AccountRecyclerViewAdapter accountRecyclerViewAdapter;
     private String typeTest = "支出";
 
-    TextView textViewIncomeTotal,textViewCostTotal;
-
+    EditViewModel editViewModel;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 //        //秒
 //        int second = calendar.get(Calendar.SECOND);
         textViewYear.setText(year + "年");
-        textViewMonthDay.setText(month+"月"+day+"日");
+        textViewMonthDay.setText(month + "月" + day + "日");
 
         textViewCostTotal = findViewById(R.id.costTotal);
         textViewIncomeTotal = findViewById(R.id.incomeTotal);
@@ -88,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
         accountRecyclerViewAdapter = new AccountRecyclerViewAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(accountRecyclerViewAdapter);
+
+
+        editViewModel = new ViewModelProvider(this
+                , new ViewModelProvider.AndroidViewModelFactory(getApplication())).get(EditViewModel.class);
         //使用ViewModel
         accountViewModel = new ViewModelProvider(this
                 , new ViewModelProvider.AndroidViewModelFactory(getApplication())).get(AccountViewModel.class);
@@ -95,13 +95,11 @@ public class MainActivity extends AppCompatActivity {
                 , new Observer<List<Account>>() {
                     @Override
                     public void onChanged(final List<Account> accounts) {
-
-
-
-                        List<Account>allAccount = accounts;
+                        //前期数据处理，从而实现不同的视图布局
+                        List<Account> allAccount = accounts;
                         List<TypeAccount> typeAccounts = new ArrayList<>();
-                        for (int i = 0;i<allAccount.size();i++){
-                            if (i == 0&&accounts.size()!=0){
+                        for (int i = 0; i < allAccount.size(); i++) {
+                            if (i == 0 && accounts.size() != 0) {
                                 TypeAccount typeAccount = new TypeAccount(-1,
                                         allAccount.get(i).getDate(),
                                         allAccount.get(i).isType(),
@@ -122,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                                         null,
                                         null);
                                 typeAccounts.add(typeAccount1);
-                            }else if (!isSameDay(allAccount.get(i).getDate(),allAccount.get(i-1).getDate())){
+                            } else if (!isSameDay(allAccount.get(i).getDate(), allAccount.get(i - 1).getDate())) {
                                 TypeAccount typeAccount = new TypeAccount(-1,
                                         allAccount.get(i).getDate(),
                                         allAccount.get(i).isType(),
@@ -143,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                                         null,
                                         null);
                                 typeAccounts.add(typeAccount1);
-                            }else {
+                            } else {
                                 TypeAccount typeAccount = new TypeAccount(allAccount.get(i).getId(),
                                         allAccount.get(i).getDate(),
                                         allAccount.get(i).isType(),
@@ -156,53 +154,53 @@ public class MainActivity extends AppCompatActivity {
                                 typeAccounts.add(typeAccount);
                             }
                         }
-                        Log.e("alllisr",allAccount.size()+"ddd");
-                        Log.e("mmmmmmm",typeAccounts.size()+"ddd");
-                        float cost=0;
-                        float income=0;
+                        Log.e("alllisr", allAccount.size() + "ddd");
+                        Log.e("mmmmmmm", typeAccounts.size() + "ddd");
+                        float cost = 0;
+                        float income = 0;
                         int m = 0;
-
-                        if (typeAccounts.size()>0){
-                        for (int i =0;i<typeAccounts.size()+1;i++){
-                            if (i==typeAccounts.size()){
-                                typeAccounts.get(i-m).setCost(String.valueOf(cost));
-                                typeAccounts.get(i-m).setIncome(String.valueOf(income));
-                            }else if (typeAccounts.get(i).isTitle()){
-                                typeAccounts.get(i-m).setCost(String.valueOf(cost));
-                                typeAccounts.get(i-m).setIncome(String.valueOf(income));
-                                cost=0;
-                                m = 1;
-                            }else  {
-                                if (typeAccounts.get(i).isType()){
-                                    income += Float.parseFloat(typeAccounts.get(i).getAmount());
-                                }else {
-                                    cost += Float.parseFloat(typeAccounts.get(i).getAmount());
+                        //判断列表是否为空，为空则不进行取值操作，否则会报错
+                        if (typeAccounts.size() > 0) {
+                            for (int i = 0; i < typeAccounts.size() + 1; i++) {
+                                if (i == typeAccounts.size()) {
+                                    typeAccounts.get(i - m).setCost(String.valueOf(cost));
+                                    typeAccounts.get(i - m).setIncome(String.valueOf(income));
+                                } else if (typeAccounts.get(i).isTitle()) {
+                                    typeAccounts.get(i - m).setCost(String.valueOf(cost));
+                                    typeAccounts.get(i - m).setIncome(String.valueOf(income));
+                                    cost = 0;
+                                    m = 1;
+                                } else {
+                                    if (typeAccounts.get(i).isType()) {
+                                        income += Float.parseFloat(typeAccounts.get(i).getAmount());
+                                    } else {
+                                        cost += Float.parseFloat(typeAccounts.get(i).getAmount());
+                                    }
+                                    m += 1;
                                 }
-                                m +=1;
                             }
-                        }
-                        for (int i =0;i<typeAccounts.size();i++){
-                            Log.e("type",typeAccounts.get(0).getAmount());
-                        }
-                        for (int i =0;i<allAccount.size();i++){
-                            Log.e("mmmmmmmmmmmmmmmmmm",allAccount.get(0).getNote());
-                        }
-                        Log.e("sizeall",allAccount.size()+"ddd");
-                        Log.e("sizeafter",typeAccounts.size()+"ddd");
+                            for (int i = 0; i < typeAccounts.size(); i++) {
+                                Log.e("type", typeAccounts.get(0).getAmount());
+                            }
+                            for (int i = 0; i < allAccount.size(); i++) {
+                                Log.e("mmmmmmmmmmmmmmmmmm", allAccount.get(0).getNote());
+                            }
+                            Log.e("sizeall", allAccount.size() + "ddd");
+                            Log.e("sizeafter", typeAccounts.size() + "ddd");
                         }
 
                         accountRecyclerViewAdapter.getAllAccount(typeAccounts);
-                        float costall =0;
+                        float costall = 0;
                         float incomeall = 0;
-                        for (int i =0;i<accounts.size();i++){
-                            if (accounts.get(i).isType()){
+                        for (int i = 0; i < accounts.size(); i++) {
+                            if (accounts.get(i).isType()) {
                                 incomeall += Float.parseFloat(accounts.get(i).getAmount());
-                            }else {
+                            } else {
                                 costall += Float.parseFloat(accounts.get(i).getAmount());
                             }
                         }
-                        textViewCostTotal.setText("总消费\n "+ costall);
-                        textViewIncomeTotal.setText("总收入\n "+ incomeall);
+                        textViewCostTotal.setText("总消费\n " + costall);
+                        textViewIncomeTotal.setText("总收入\n " + incomeall);
 //                        //当ItemDecoration已经添加了一个的时候，为了防止重复绘制，移除掉旧数据的，同时继续给新的数据设置Decoration，新的就变为了
 //                        //0，如果数据再次改变刷新，那么就移除0.再添加
 //                        if (recyclerView.getItemDecorationCount() != 0) {
@@ -283,22 +281,23 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-
+        //点击跳转页面
         recyclerView.addOnItemTouchListener(new OnRecyclerViewClickListener(recyclerView) {
             @Override
             public void onItemClick(RecyclerView.ViewHolder viewHolder) {
                 final int id = (int) viewHolder.itemView.getTag(R.id.tag_id);
-                if (id!=-1){
+                if (id != -1) {
                     Intent intent = new Intent(MainActivity.this, EditPreActivity.class);
+//                    editViewModel.id = id;
                     intent.putExtra("ID", id);
                     startActivity(intent);
                 }
             }
-
+            //长按删除，并弹出Toast
             @Override
             public void onItemLongClick(RecyclerView.ViewHolder viewHolder) {
                 final int id = (int) viewHolder.itemView.getTag(R.id.tag_id);
-                if (id!=-1){
+                if (id != -1) {
                     final long date = (long) viewHolder.itemView.getTag(R.id.tag_date);
                     final String amount = (String) viewHolder.itemView.getTag(R.id.tag_amounnt);
                     final boolean type = (boolean) viewHolder.itemView.getTag(R.id.tag_type);
@@ -307,24 +306,21 @@ public class MainActivity extends AppCompatActivity {
                     Account account = new Account(date, type, kind, note, amount);
                     account.setId(id);
                     accountViewModel.deleteAccount(account);
-                    if (type == true){
+                    if (type == true) {
                         MainActivity.this.typeTest = "收入";
                     }
-                    Toast.makeText(MainActivity.this,"删除了"+typeTest+date+kind+note+amount,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "删除了" + typeTest + date + kind + note + amount, Toast.LENGTH_SHORT).show();
                 }
 
             }
         });
 
     }
-    public boolean isSameDay(long date1,long date2){
+    //比较是否为同一天
+    public boolean isSameDay(long date1, long date2) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String da1 = simpleDateFormat.format(date1);
         String da2 = simpleDateFormat.format(date2);
-        if (da1.equals(da2)){
-            return true;
-        }else {
-            return false;
-        }
+        return da1.equals(da2);
     }
 }

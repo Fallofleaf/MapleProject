@@ -2,16 +2,11 @@ package com.zxk147.maple;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CalendarView;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,16 +19,15 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.zxk147.maple.View.NumKeyBoardView;
 import com.zxk147.maple.data.Account;
 import com.zxk147.maple.data.AccountViewModel;
 import com.zxk147.maple.editFragment.CostFragment;
+import com.zxk147.maple.editFragment.EditViewModel;
 import com.zxk147.maple.editFragment.IncomeFragment;
 
 import java.util.Calendar;
-import java.util.Date;
 
-public class EditActivity extends AppCompatActivity {
+public class EditActivity extends AppCompatActivity{
 
     private static String TAG= "EditActivity";
 
@@ -47,23 +41,41 @@ public class EditActivity extends AppCompatActivity {
     TabItem tabItem1,tabItem2;
 
     Bundle bundle;
-
     private long mCalendar = 0;
 
+    int editKind=-1;
+
+    EditViewModel editViewModel;
+
+
+    Fragment incomeFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
+        //初始化fragment和bundle
+        final CostFragment costFragment = new CostFragment();
 
+        incomeFragment = new IncomeFragment();
+        bundle = new Bundle();
 
         editTextNote = findViewById(R.id.editTextNote);
         editTextAmount = findViewById(R.id.editTextAmuont);
         editTextKind = findViewById(R.id.editTextKind);
         buttonConfirm = findViewById(R.id.edit_confirm);
-        tableLayout = findViewById(R.id.tabLayout);
-        tabItem1 = findViewById(R.id.asd);
-        tabItem2 = findViewById(R.id.ds);
-        viewPager2 = findViewById(R.id.viewpager_edit);
+
+
+        editViewModel = new ViewModelProvider(this
+                ,new ViewModelProvider
+                .AndroidViewModelFactory(getApplication()))
+                .get(EditViewModel.class);
+        editViewModel.getMyPosition().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                editKind=integer;
+            }
+        });
+
 
         calendarView = findViewById(R.id.edit_calendarView);
 
@@ -71,25 +83,61 @@ public class EditActivity extends AppCompatActivity {
                 ,new ViewModelProvider
                 .AndroidViewModelFactory(getApplication()))
                 .get(AccountViewModel.class);
+        tableLayout = findViewById(R.id.tabLayout);
+        tabItem1 = findViewById(R.id.asd);
+        tabItem2 = findViewById(R.id.ds);
+        viewPager2 = findViewById(R.id.viewpager_edit);
+
+
 
         final Intent intent = getIntent();
         id = intent.getIntExtra("ID",-1);
+        id = editViewModel.id;
         if (id!=-1){
             accountViewModel.getQueryById(id).observe(this, new Observer<Account>() {
                 @Override
                 public void onChanged(final Account account) {
                     calendarView.setDate(account.getDate());
-                    String date = (String) DateFormat.format("yyyy年MM月dd日",account.getDate());
+                    mCalendar = account.getDate();
+//                    String date = (String) DateFormat.format("yyyy年MM月dd日",account.getDate());
                     editTextNote.setText(account.getNote());
                     editTextKind.setText(String.valueOf(account.getKind()));
                     editTextAmount.setText(account.getAmount());
                     calendarView.setDate(account.getDate());
 
+//                    /**
+//                     * 在合适的位置调用接口里面的方法,传递数据
+//                     */
+//                    editKind = account.getKind();
+                    editViewModel.changeMyPosition(account.getKind());
+                    Log.e(TAG,"此时的kind是："+account.getKind());
 
-                    bundle = new Bundle();
-                    bundle.putInt("KIND",account.getKind());
-                    Log.e(TAG,"此时的bundle是："+bundle);
-
+                    viewPager2.setAdapter(new FragmentStateAdapter(EditActivity.this) {
+                        @NonNull
+                        @Override
+                        public Fragment createFragment(int position) {
+                            if (position == 0) {
+                                return costFragment;
+                            }else {
+                                return incomeFragment;
+                            }
+                        }
+                        @Override
+                        public int getItemCount() {
+                            return 2;
+                        }
+                    });
+                    new TabLayoutMediator(tableLayout, viewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
+                        @Override
+                        public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                            Log.e("position",position+"sdd");
+                            if (position == 0) {
+                                tab.setText("支出");
+                            }else {
+                                tab.setText("收入");
+                            }
+                        }
+                    }).attach();
 //                    if (account.isType()){
 //                        editTextType.setText("收入");
 //                    }else {
@@ -108,8 +156,8 @@ public class EditActivity extends AppCompatActivity {
 
                 }
             });
-            Calendar calendar = Calendar.getInstance();
-            mCalendar = calendar.getTime().getTime();
+//            Calendar calendar = Calendar.getInstance();
+//            mCalendar = calendar.getTime().getTime();
             calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
                 @Override
                 public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
@@ -127,15 +175,48 @@ public class EditActivity extends AppCompatActivity {
                     if (currentItem==0){
                         type = false;
                     }
-
+//                    costFragment.setKindListener(new CostFragment.putKindListener() {
+//                        @Override
+//                        public void PutKindListener(int position) {
+//                            editKind = position;
+//                        }
+//                    });
                     int kind = Integer.parseInt(editTextKind.getText().toString());
-                    Account account = new Account(mCalendar,type,kind,editTextNote.getText().toString(),editTextAmount.getText().toString());
+                    Account account = new Account(mCalendar,type,editKind,editTextNote.getText().toString(),editTextAmount.getText().toString());
                     account.setId(id);
                     accountViewModel.updateAccount(account);
                     finish();
                 }
             });
         }else {
+
+            viewPager2.setAdapter(new FragmentStateAdapter(EditActivity.this) {
+                @NonNull
+                @Override
+                public Fragment createFragment(int position) {
+                    if (position == 0) {
+                        return costFragment;
+                    }else {
+                        return incomeFragment;
+                    }
+                }
+                @Override
+                public int getItemCount() {
+                    return 2;
+                }
+            });
+            new TabLayoutMediator(tableLayout, viewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
+                @Override
+                public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                    Log.e("position",position+"sdd");
+                    if (position == 0) {
+                        tab.setText("支出");
+                    }else {
+                        tab.setText("收入");
+                    }
+                }
+            }).attach();
+
             Calendar calendar = Calendar.getInstance();
             mCalendar = calendar.getTime().getTime();
             calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
@@ -155,45 +236,56 @@ public class EditActivity extends AppCompatActivity {
                     if (currentItem==0){
                         type = false;
                     }
+                    editViewModel.getMyPosition().observe(EditActivity.this, new Observer<Integer>() {
+                        @Override
+                        public void onChanged(Integer integer) {
+                            editKind = integer;
+                        }
+                    });
                     int kind = Integer.parseInt(editTextKind.getText().toString());
-                    Account account = new Account(mCalendar,type,kind,editTextNote.getText().toString(),editTextAmount.getText().toString());
+                    Account account = new Account(mCalendar,type,editKind,editTextNote.getText().toString(),editTextAmount.getText().toString());
                     accountViewModel.insertAccount(account);
                     finish();
                 }
             });
         }
-        viewPager2.setAdapter(new FragmentStateAdapter(this) {
-            @NonNull
-            @Override
-            public Fragment createFragment(int position) {
-                if (position == 0) {
-                    Fragment fragment = new CostFragment();
-                    Log.e(TAG,"传入fragment前的bundle是："+bundle);
-                    fragment.setArguments(bundle);
-                    return fragment;
-                }else {
-                    return new IncomeFragment();
-                }
-            }
-            @Override
-            public int getItemCount() {
-                return 2;
-            }
-        });
 
-        new TabLayoutMediator(tableLayout, viewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
-            @Override
-            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                Log.e("position",position+"sdd");
-                if (position == 0) {
-                    tab.setText("支出");
-                }else {
-                    tab.setText("收入");
-                }
-            }
-        }).attach();
 
+
+//        /**
+//         * 在合适的位置调用接口里面的方法,传递数据
+//         */
+//        Log.e(TAG,"sdfdsf："+onKindListener);
+//
+//        if (onKindListener!=null){
+//
+//            onKindListener.OnKindListener(editKind);
+//        }
+
+        /**
+         * 添加Fragment
+         */
 
 
     }
+
+
+//    /**
+//     * 定义一个接口
+//     */
+//    public interface onKindListener{
+//        void OnKindListener(int kind);
+//    }
+//
+//    /**
+//     * 定义变量存储数据
+//     */
+//
+//    private onKindListener onKindListener;
+//    /**
+//     * 提供公共方法,并且初始化接口类型的数据
+//     */
+//    public void setKindListener(onKindListener onKindListener){
+//        this.onKindListener = onKindListener;
+//    }
 }

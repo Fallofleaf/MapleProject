@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.zxk147.maple.data.Account;
 import com.zxk147.maple.data.AccountDao;
 import com.zxk147.maple.data.AccountViewModel;
+import com.zxk147.maple.editFragment.EditViewModel;
 
 import java.text.Format;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class EditPreActivity extends AppCompatActivity {
     AccountViewModel accountViewModel;
     private int id;
 
-
+    EditViewModel editViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +39,8 @@ public class EditPreActivity extends AppCompatActivity {
 
         Intent intent =getIntent();
         id = intent.getIntExtra("ID",-1);
-
+//        editViewModel = new ViewModelProvider(this,new ViewModelProvider.NewInstanceFactory()).get(EditViewModel.class);
+//        id = editViewModel.id;
         accountViewModel = new ViewModelProvider(this
                 ,new ViewModelProvider
                 .AndroidViewModelFactory(getApplication()))
